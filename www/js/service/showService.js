@@ -20,7 +20,7 @@ onsModule.factory('ShowService', function() {
             }
           showList.push(inputList);//代入
         }
-        console.log(showList);
+       
         return showList;
       }
     }    

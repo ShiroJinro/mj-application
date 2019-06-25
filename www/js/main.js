@@ -74,11 +74,11 @@ onsModule.controller('topCtrl', function() {
   //集計画面のコントローラー
 onsModule.controller('ResultCtrl', function(ShowService,ShareDataService) {
 
-    var first = 250;//持ち点
+    var firstPt = 250;//持ち点
     var returnPt = 300;//返し点
     var umaPtList = [30,10,-10,-30];//ウマ
 
-    this.firstPt = first;//Viewへバインド
+    this.firstPt = firstPt;//Viewへバインド
     this.returnPt = returnPt;//Viewへバインド
     this.umaPtList = umaPtList;//Viewへバインド
 
@@ -98,13 +98,50 @@ onsModule.controller('ResultCtrl', function(ShowService,ShareDataService) {
   })
 
   //プレイヤー設定画面のコントローラー
-  onsModule.controller('SetPlayerCtrl', function() {
+  onsModule.controller('SetPlayerCtrl', function(ShareDataService) {
+    //集計一覧画面へ
+    this.backTop = function(){
+      mainNavigator.pushPage('page/resultList.html');
+    };
+
+    var players = ShareDataService.getPlList();//プレイヤーリスト
+    this.players = players;//Viewへバインド
+
+    this.changeName = function(nowName,indexNumber) {
+      mainNavigator.pushPage('page/playerSettingDetail.html',
+      {data: {index: indexNumber,
+              name: nowName}});
+    };
+  })
+
+    //プレイヤー設定詳細画面のコントローラー
+  onsModule.controller('PlayerDetailCtrl', function($scope,ShareDataService) {
     this.back = function(){
       mainNavigator.popPage();
     };
-    this.backTop = function(){
-      mainNavigator.pushPage('page/resultList.html');;
-    };
+    this.playerData = $scope.mainNavigator.topPage.data;//前画面で選択したプレイヤー情報を引き継ぐ(index,name)
+    
+    //入力した情報でプレイヤー名を更新する
+    this.changeNameComplete = function(index) {
+      var newName = this.newName;
+      if (newName == null) {
+        ons.notification.alert({
+          message: '変更後のプレイヤー名を入力してください',
+          title: 'エラーだよ'
+        });
+      } else {
+        var resultCode = ShareDataService.changeNameData(index,newName);//保持データのプレイヤー名を更新
+        if (resultCode == -1) {
+          //重複エラーの場合
+          ons.notification.alert({
+          message: '既に登録済のプレイヤー名です',
+          title: 'エラーだよ'
+        });
+        } else {
+          mainNavigator.pushPage('page/playerSetting.html');
+        }
+      }
+    }
   })
 
   ;//コントローラーClose
